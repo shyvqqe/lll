@@ -67,6 +67,10 @@ export function createPostgresAdapter(pool) {
         const result = await pool.query(query);
         return result.rows[0] ?? null;
       },
+      async all() {
+        const result = await pool.query(query);
+        return { results: result.rows };
+      },
       async run() {
         const result = await pool.query(query);
         return { success: true, meta: { changes: result.rowCount } };
@@ -104,7 +108,9 @@ export function createPostgresAdapter(pool) {
       await pool.query(`
         SELECT EXISTS (SELECT 1 FROM suzy.accounts WHERE nickname_key IS NOT NULL),
                EXISTS (SELECT 1 FROM suzy.sessions WHERE token_hash IS NOT NULL),
-               EXISTS (SELECT 1 FROM suzy.auth_attempts WHERE scope IS NOT NULL)
+               EXISTS (SELECT 1 FROM suzy.auth_attempts WHERE scope IS NOT NULL),
+               EXISTS (SELECT 1 FROM suzy.site_admins WHERE nickname_key IS NOT NULL),
+               EXISTS (SELECT 1 FROM suzy.site_posts WHERE id IN ('news', 'notes'))
       `);
     },
   };

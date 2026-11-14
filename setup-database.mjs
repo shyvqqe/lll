@@ -61,6 +61,7 @@ async function promptForConnection() {
 }
 
 async function setup() {
+  const upgrade = process.argv.includes('--upgrade');
   const adminUrl = process.argv.includes('--guided') ? await promptForConnection() : process.env.DATABASE_ADMIN_URL;
   if (!adminUrl) throw new Error('Укажи DATABASE_ADMIN_URL в файле .env.setup.');
   const certificatePath = process.env.DATABASE_SSL_ROOT_CERT_FILE;
@@ -74,19 +75,35 @@ async function setup() {
   if (options.user !== 'postgres' && !options.user.startsWith('postgres.')) {
     throw new Error('Для первоначальной настройки используй строку подключения роли postgres.');
   }
-  const sql = await readFile(new URL('./supabase/migrations/20261114111520_suzy_accounts.sql', import.meta.url), 'utf8');
-  const password = randomBytes(32).toString('base64url');
-  const runtimeUrl = new URL(adminUrl);
-  runtimeUrl.username = `suzy_app${options.user.slice('postgres'.length)}`;
-  runtimeUrl.password = password;
+  const baseMigration = new URL('./supabase/migrations/20261114111520_suzy_accounts.sql', import.meta.url);
+  const postsMigration = new URL('./supabase/migrations/20261114122724_suzy_site_posts.sql', import.meta.url);
+  const runtimePassword = upgrade ? undefined : randomBytes(32).toString('base64url');
 
   const admin = new pg.Client({ ...options, connectionTimeoutMillis: 10_000 });
   try {
     await admin.connect();
     await admin.query('BEGIN');
-    await admin.query(sql);
-    // The verifier contains only the fixed prefix, digits and base64 characters.
-    await admin.query(`ALTER ROLE suzy_app LOGIN PASSWORD '${scramVerifier(password)}'`);
+    await admin.query('SELECT pg_advisory_xact_lock(1918157002)');
+    const { rows: [tables] } = await admin.query(`
+      SELECT to_regclass('suzy.accounts') IS NOT NULL AS accounts,
+             to_regclass('suzy.site_posts') IS NOT NULL AS posts,
+             to_regclass('suzy.site_admins') IS NOT NULL AS admins
+    `);
+    if (upgrade && !tables.accounts) {
+      throw new Error('В этом проекте ещё нет базы suzy. Запусти npm.cmd run setup:guided.');
+    }
+    if (!upgrade && tables.accounts) {
+      throw new Error('База suzy уже настроена. Для обновления запусти npm.cmd run setup:guided -- --upgrade.');
+    }
+    if (tables.posts !== tables.admins || (!tables.accounts && tables.posts)) {
+      throw new Error('Схема публикаций настроена частично. Проверь миграцию в Supabase.');
+    }
+    if (!upgrade) {
+      await admin.query(await readFile(baseMigration, 'utf8'));
+      // The verifier contains only the fixed prefix, digits and base64 characters.
+      await admin.query(`ALTER ROLE suzy_app LOGIN PASSWORD '${scramVerifier(runtimePassword)}'`);
+    }
+    if (!tables.posts) await admin.query(await readFile(postsMigration, 'utf8'));
     await admin.query('COMMIT');
   } catch (cause) {
     await admin.query('ROLLBACK').catch(() => {});
@@ -95,8 +112,15 @@ async function setup() {
     await admin.end();
   }
 
-  console.log('База готова. Скопируй значение после DATABASE_URL= в Render. Не публикуй эту строку.');
-  console.log(`DATABASE_URL=${runtimeUrl.href}`);
+  if (upgrade) {
+    console.log('База обновлена. Текущий DATABASE_URL на Render по-прежнему подходит.');
+  } else {
+    const runtimeUrl = new URL(adminUrl);
+    runtimeUrl.username = `suzy_app${options.user.slice('postgres'.length)}`;
+    runtimeUrl.password = runtimePassword;
+    console.log('База готова. Скопируй значение после DATABASE_URL= в Render. Не публикуй эту строку.');
+    console.log(`DATABASE_URL=${runtimeUrl.href}`);
+  }
 }
 
 try {

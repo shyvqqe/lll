@@ -34,7 +34,7 @@ h1, h2, h3, p, figure { margin: 0; }
 .brand { display: inline-flex; align-items: center; gap: 11px; justify-self: start; width: max-content; white-space: nowrap; font-weight: 750; font-size: 20px; letter-spacing: -.045em; }
 .brand-mark { display: grid; place-items: center; width: 39px; height: 39px; color: var(--bg); background: var(--text); border-radius: 9px; --duck-eye: var(--text); }
 .brand-mark svg { width: 26px; height: 26px; }
-.header-nav { color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.header-nav { display: flex; gap: 26px; color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; }
 .header-nav a { position: relative; padding-block: 12px; }
 .header-nav a::after { position: absolute; inset: auto 0 5px; height: 1px; background: var(--amber); content: ''; scale: 0 1; transform-origin: left; transition: scale .2s var(--ease-out); }
 .header-nav a:is(:hover, :focus-visible)::after { scale: 1 1; }
@@ -116,11 +116,64 @@ dialog h2 { font-size: 37px; }
 .toast { position: fixed; z-index: 2; right: 24px; bottom: 24px; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 48px); padding: 14px 18px; border: 1px solid #64503b; background: #29231d; border-radius: 8px; color: var(--text); box-shadow: 0 12px 36px #0006; font-size: 14px; }
 .toast .icon { color: var(--amber); }
 
+.club-section { padding: 50px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 16px; }
+.section-title { font-size: clamp(31px, 3.4vw, 53px); line-height: 1.05; font-weight: 750; letter-spacing: -.061em; }
+.section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px 24px; flex-wrap: wrap; }
+.section-heading time { color: var(--amber); font: 13px ui-monospace, Consolas, monospace; white-space: nowrap; }
+.posts-grid, .daily-layout { display: grid; gap: 12px; margin-top: 25px; }
+.posts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.post-card { min-width: 0; padding: 22px 24px 26px; border: 1px solid var(--line); border-radius: 10px; background: linear-gradient(155deg, #232221, #1c1c1c 48%); transition: border-color .25s ease, box-shadow .25s ease; }
+.post-card:focus-within { border-color: #645040; }
+.post-top { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.post-top .rule-icon { margin: 0; }
+.post-edit { padding-inline: 13px; min-height: 44px; font-size: 13px; }
+.post-edit .icon { width: 15px; height: 15px; }
+.post-card h3 { font-size: clamp(21px, 2.3vw, 29px); font-weight: 750; line-height: 1.15; letter-spacing: -.045em; overflow-wrap: anywhere; }
+.post-card [data-post-body] { color: #c0bdb8; font-size: 15px; line-height: 1.65; margin-top: 9px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.posts-status { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.posts-status:not(:empty) { margin-top: 13px; }
+.field textarea { display: block; width: 100%; resize: vertical; min-height: 110px; max-height: 38vh; padding: 12px 13px; border: 1px solid #494949; border-radius: 7px; background: #171717; color: var(--text); font: inherit; line-height: 1.45; }
+.field textarea:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+#post-editor .brand-mark .icon { width: 22px; height: 22px; }
+
+.daily-layout { grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr); }
+.sign-picker, .daily-reading { border: 1px solid var(--line); border-radius: 10px; padding: clamp(20px, 2.5vw, 34px); background: #1c1c1c; }
+.sign-picker h3 { font-size: 16px; font-weight: 650; margin-bottom: 17px; }
+.signs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.sign-button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 66px; padding: 6px 4px; border: 1px solid #3b3b3b; border-radius: 7px; background: #252525; color: #ddd9d3; font-size: 12px; font-weight: 600; transition: background .2s ease, border-color .2s ease, transform .2s var(--ease-out); }
+.sign-button span { color: #c5bcb1; font: 24px/1 'Segoe UI Symbol', sans-serif; }
+.sign-button[aria-pressed="true"] { background: #332a22; border-color: #9b724b; color: var(--text); }
+.sign-button[aria-pressed="true"] span { color: var(--amber); }
+.daily-reading { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; gap: 21px; min-height: 360px; background: radial-gradient(ellipse at 91% 12%, #332922, transparent 62%), #202020; }
+.daily-copy h3 { font-size: clamp(36px, 4.5vw, 61px); line-height: 1.05; letter-spacing: -.064em; }
+.daily-copy > p { position: relative; margin-top: 10px; max-width: 46ch; font-size: 16px; line-height: 1.6; color: #ded9d1; }
+.daily-task { position: relative; padding: 14px 16px; margin-top: 23px; border: 1px solid #4e4238; border-left: 2px solid #b68455; border-radius: 5px; background: #211d19e6; }
+.daily-task h4 { display: flex; align-items: center; gap: 7px; color: var(--amber); margin: 0 0 7px; font-size: 13px; }
+.daily-task h4 .icon { width: 15px; height: 15px; }
+.daily-task p { font-size: 15px; line-height: 1.55; }
+.task-button { align-self: flex-start; min-height: 44px; white-space: normal; text-align: left; }
+.task-button[aria-pressed="true"] { border-color: #9b724b; background: #332a22; }
+.task-button[aria-pressed="true"] .icon { color: var(--amber); }
+.astro-mark { position: absolute; z-index: -1; top: -78px; right: -53px; width: 295px; height: 295px; display: grid; place-items: center; border: 1px solid #8665444f; border-radius: 50%; color: #f5b97d28; pointer-events: none; }
+.astro-mark i { position: absolute; inset: 20px; border: 1px solid #b684554a; border-radius: 50%; }
+.astro-mark i + i { inset: 34px; border-style: dashed; }
+.astro-mark span { font: 133px/1 'Segoe UI Symbol', sans-serif; }
+
+@media (hover: hover) {
+  .post-card:hover { border-color: #645040; box-shadow: inset 0 1px 0 #b6845540; }
+  .sign-button:hover { background: #31302f; border-color: #716253; }
+  .sign-button[aria-pressed="true"]:hover { background: #3b3026; border-color: var(--amber); }
+}
+
 @media (max-width: 1050px) {
   :root { --page: calc(100% - 72px); }
   .hero-picture { left: 29%; }
   .hero h1 { font-size: clamp(55px, 7.1vw, 81px); }
   .rules-grid article { padding: 23px 20px; }
+}
+
+@media (max-width: 940px) {
+  .header-nav { gap: 16px; }
 }
 
 @media (max-width: 760px) {
@@ -150,6 +203,10 @@ dialog h2 { font-size: 37px; }
   .rules-grid { grid-template-columns: 1fr; margin-top: 23px; }
   .rules-grid article + article { border-left: 0; border-top: 1px solid var(--line); }
   .site-footer .footer-inner { min-height: 67px; }
+  .club-section { padding: 34px 0; }
+  .posts-grid, .daily-layout { grid-template-columns: minmax(0, 1fr); margin-top: 20px; }
+  .daily-reading { min-height: 0; }
+  .astro-mark { top: -80px; right: -74px; }
 }
 
 @media (max-width: 380px) {
@@ -187,6 +244,17 @@ dialog h2 { font-size: 37px; }
   to { opacity: 1; }
 }
 
+@keyframes water-light {
+  from { transform: translateX(-110%) skewX(-19deg); opacity: 0; }
+  25% { opacity: .7; }
+  to { transform: translateX(110%) skewX(-19deg); opacity: 0; }
+}
+
+@keyframes orbit-in {
+  from { transform: rotate(-72deg) scale(.91); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .hero-line { animation: reveal-title .43s var(--ease-out) both; }
   .hero-line + .hero-line { animation-delay: .105s; }
@@ -194,12 +262,17 @@ dialog h2 { font-size: 37px; }
   .hero-actions { animation: rise-in .38s .24s var(--ease-out) both; }
   .hero-picture { animation: reveal-photo .64s .04s var(--ease-out) both; }
   .hero-picture img { animation: settle-photo .92s var(--ease-out); }
+  .hero-picture::before { position: absolute; inset: 45% 4% 7%; z-index: 1; content: ''; background: linear-gradient(90deg, transparent 26%, #fff2 48%, transparent 62%); pointer-events: none; opacity: 0; animation: water-light 1.25s .46s var(--ease-out) both; }
   .scroll-link .icon, .button .icon { transition: transform .2s var(--ease-out); }
   .button:active:enabled { transform: translateY(1px); }
   .button:is(:hover, :focus-visible):enabled .icon { transform: translateX(3px); }
   .scroll-link:is(:hover, :focus-visible) .icon { transform: translateY(3px); }
   dialog[open], .toast:not([hidden]) { animation: rise-in .22s var(--ease-out); }
   dialog[open]::backdrop { animation: show-backdrop .22s ease-out; }
+  .sign-button:active { transform: scale(.96); }
+  [data-reveal].revealed { animation: rise-in .56s var(--ease-out) both; }
+  .post-card:nth-child(2).revealed { animation-delay: .08s; }
+  .daily-layout.revealed .astro-mark { animation: orbit-in .86s var(--ease-out) both; }
 }
 
 @media (prefers-reduced-motion: reduce) {

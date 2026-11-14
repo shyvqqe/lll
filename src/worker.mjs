@@ -1,4 +1,5 @@
 import { handleApi } from "./auth.mjs";
+import { handleContent } from "./content.mjs";
 
 const mediaTypes = {
   avif: "image/avif",
@@ -32,6 +33,9 @@ export function createWorker(readAsset, { secureCookies = true, passwordIteratio
   return {
     async fetch(request, env) {
       const url = new URL(request.url);
+      if (url.pathname === "/api/content" || url.pathname.startsWith("/api/content/")) {
+        return handleContent(request, env.DB, { secureCookies });
+      }
       if (url.pathname.startsWith("/api/")) {
         return handleApi(request, env.DB, { secureCookies, passwordIterations });
       }

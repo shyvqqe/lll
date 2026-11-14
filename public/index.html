@@ -10,8 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap">
-  <link rel="stylesheet" href="/style.css?v=3">
-  <script type="module" src="/app.js"></script>
+  <link rel="stylesheet" href="/style.css?v=4">
+  <script type="module" src="/content.js"></script>
+  <script type="module" src="/app.js?v=4"></script>
+  <script type="module" src="/daily.js"></script>
 </head>
 <body>
   <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -25,6 +27,10 @@
     <symbol id="i-slash" viewBox="0 0 24 24"><path d="m4 4 16 16"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2c0 6-4 10-10 10 6 0 10 4 10 10 0-6 4-10 10-10-6 0-10-4-10-10Z"/></symbol>
+    <symbol id="i-post" viewBox="0 0 24 24"><path d="M4 7h4l11-4v16L8 15H4zM8 15l2 6H6l-2-6"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7m-7 4h5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4-1L21 6l-4-4L4 15z"/></symbol>
   </svg>
 
   <header class="site-header" id="top">
@@ -33,7 +39,7 @@
         <span class="brand-mark"><svg aria-hidden="true"><use href="#i-duck"/></svg></span>
         <span>suzy</span>
       </a>
-      <nav class="header-nav" aria-label="Навигация"><a href="#rules">Правила клуба</a></nav>
+      <nav class="header-nav" aria-label="Навигация"><a href="#public-posts">Публикации</a><a href="#daily">Гороскоп</a><a href="#rules">Правила</a></nav>
       <div class="header-actions" data-guest>
         <button class="button button-outline" type="button" data-open="login">Войти</button>
         <button class="button button-light" type="button" data-open="register">Регистрация <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></button>
@@ -62,10 +68,52 @@
           <button class="button button-light" type="button" data-open="profile">Мой профиль <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </div>
       </div>
-      <a class="scroll-link" href="#rules"><span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></span> Правила клуба</a>
+      <a class="scroll-link" href="#daily"><span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></span> Гороскоп и задание</a>
     </section>
 
-    <section class="rules" id="rules" aria-labelledby="rules-title">
+    <section class="club-section" id="public-posts" aria-labelledby="posts-title">
+      <h2 id="posts-title" class="section-title" data-reveal>Публикации</h2>
+      <div class="posts-grid">
+        <article class="post-card" data-site-post="news" data-reveal>
+          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-post"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать новости" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> Редактировать</button></div>
+          <h3 data-post-title>Новости</h3>
+          <div data-post-body></div>
+        </article>
+        <article class="post-card" data-site-post="notes" data-reveal>
+          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-note"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать заметки" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> Редактировать</button></div>
+          <h3 data-post-title>Заметки</h3>
+          <div data-post-body></div>
+        </article>
+      </div>
+      <p class="posts-status" id="site-posts-status" role="status"></p>
+    </section>
+
+    <section class="club-section daily" id="daily" aria-labelledby="daily-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="daily-title" class="section-title">Гороскоп на сегодня</h2>
+        <time id="daily-date"></time>
+      </div>
+      <div class="daily-layout" data-reveal>
+        <div class="sign-picker">
+          <h3 id="sign-label">Выбери свой знак</h3>
+          <div id="signs" class="signs" role="group" aria-labelledby="sign-label"></div>
+        </div>
+        <article class="daily-reading" aria-labelledby="daily-sign">
+          <div class="astro-mark" aria-hidden="true"><i></i><i></i><span id="daily-mark">♈</span></div>
+          <div id="daily-copy" class="daily-copy" aria-live="polite">
+            <h3 id="daily-sign"></h3>
+            <p id="daily-forecast"></p>
+            <div class="daily-task">
+              <h4><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> Задание дня</h4>
+              <p id="daily-task"></p>
+            </div>
+          </div>
+          <button class="button button-outline task-button" type="button" id="daily-done" aria-pressed="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Отметить выполненным</span></button>
+        </article>
+      </div>
+    </section>
+
+    <section class="rules" id="rules" aria-labelledby="rules-title" data-reveal>
       <h2 id="rules-title">Правила никнеймов</h2>
       <div class="rules-grid">
         <article>
@@ -126,6 +174,20 @@
       <p class="form-error" role="alert" hidden></p>
       <button class="button button-outline dialog-submit" type="button" data-logout>Выйти из аккаунта</button>
     </div>
+  </dialog>
+  <dialog id="post-editor" aria-labelledby="post-editor-title">
+    <div class="dialog-top">
+      <span class="brand-mark"><svg aria-hidden="true"><use href="#i-edit"/></svg></span>
+      <button type="button" class="icon-button close-button" data-post-close aria-label="Закрыть редактор"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </div>
+    <h2 id="post-editor-title">Редактировать публикацию</h2>
+    <p class="dialog-intro">После сохранения текст увидят все посетители.</p>
+    <form id="post-editor-form">
+      <div class="field"><label for="post-title">Заголовок</label><input id="post-title" name="title" required></div>
+      <div class="field"><label for="post-body">Текст</label><textarea id="post-body" name="body" rows="6" required></textarea></div>
+      <p id="post-editor-error" class="form-error" role="alert" hidden></p>
+      <button class="button button-light dialog-submit" type="submit">Опубликовать <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+    </form>
   </dialog>
   <div class="toast" role="status" aria-live="polite" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span></span></div>
 </body>

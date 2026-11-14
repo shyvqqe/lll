@@ -36,6 +36,7 @@ function updateUser(nextUser) {
   document.querySelectorAll('[data-member]').forEach((element) => { element.hidden = !user; });
   document.querySelectorAll('[data-guest]').forEach((element) => { element.hidden = Boolean(user); });
   document.querySelectorAll('[data-nickname]').forEach((element) => { element.textContent = user?.nickname ?? ''; });
+  document.dispatchEvent(new CustomEvent('suzy:session', { detail: user }));
 }
 
 function setPasswordVisible(visible) {

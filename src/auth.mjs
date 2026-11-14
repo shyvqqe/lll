@@ -5,15 +5,25 @@ const sessionSeconds = 60 * 60 * 24 * 14;
 const attemptWindowSeconds = 60 * 15;
 const maxBodyBytes = 4096;
 
-function json(payload, status = 200, extraHeaders = {}) {
+export function json(payload, status = 200, extraHeaders = {}) {
   return Response.json(payload, {
     status,
     headers: { 'Cache-Control': 'no-store', ...extraHeaders },
   });
 }
 
-function error(message, status, headers) {
+export function error(message, status, headers) {
   return json({ error: message }, status, headers);
+}
+
+export function checkJsonWrite(request) {
+  if (request.headers.get('Origin') !== new URL(request.url).origin) {
+    return error('Обновите страницу и повторите попытку.', 403);
+  }
+  if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
+    return error('Неверный формат запроса.', 415);
+  }
+  return null;
 }
 
 function toHex(bytes) {
@@ -47,7 +57,7 @@ function hashesMatch(first, second) {
   return difference === 0;
 }
 
-async function readCredentials(request) {
+export async function readJsonBody(request, maxBytes = maxBodyBytes) {
   if (!request.body) return null;
 
   const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -59,21 +69,23 @@ async function readCredentials(request) {
       const { value, done } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > maxBodyBytes) {
+      if (size > maxBytes) {
         await reader.cancel();
         return null;
       }
       text += decoder.decode(value, { stream: true });
     }
-    const data = JSON.parse(text + decoder.decode());
-    if (typeof data?.nickname !== 'string' || typeof data.password !== 'string') return null;
-    return data;
+    return JSON.parse(text + decoder.decode());
   } catch {
     await reader.cancel().catch(() => {});
     return null;
   } finally {
     reader.releaseLock();
   }
+}
+
+function sessionCookieName(secure) {
+  return secure ? '__Host-duck_session' : 'duck_session';
 }
 
 function sessionCookie(name, token, maxAge, secure) {
@@ -86,6 +98,23 @@ function readSessionToken(request, name) {
   const cookie = cookies.split(';').map((item) => item.trim()).find((item) => item.startsWith(`${name}=`));
   const token = cookie?.slice(name.length + 1);
   return /^[0-9a-f]{64}$/.test(token ?? '') ? token : null;
+}
+
+export async function getAuthenticatedAccount(request, db, secureCookies) {
+  const token = readSessionToken(request, sessionCookieName(secureCookies));
+  if (!token) return null;
+
+  const tokenHash = await sha256(token);
+  const now = Math.floor(Date.now() / 1000);
+  const account = await db.prepare(`
+    SELECT accounts.nickname, accounts.nickname_key AS "nicknameKey",
+           site_admins.nickname_key IS NOT NULL AS "isAdmin"
+    FROM suzy.sessions
+    JOIN suzy.accounts USING (nickname_key)
+    LEFT JOIN suzy.site_admins USING (nickname_key)
+    WHERE sessions.token_hash = $1 AND sessions.expires_at > $2
+  `).bind(tokenHash, now).first();
+  return account ? { ...account, tokenHash } : null;
 }
 
 async function useAttempt(db, scope, limit, now) {
@@ -102,20 +131,10 @@ async function useAttempt(db, scope, limit, now) {
 
 export async function handleApi(request, db, { secureCookies = true, passwordIterations = 100_000 } = {}) {
   const url = new URL(request.url);
-  const cookieName = secureCookies ? '__Host-duck_session' : 'duck_session';
-  const sessionToken = readSessionToken(request, cookieName);
-  const now = Math.floor(Date.now() / 1000);
-
   if (url.pathname === '/api/session') {
     if (request.method !== 'GET') return error('Метод запроса недоступен.', 405, { Allow: 'GET' });
-    if (!sessionToken) return json({ user: null });
-    const tokenHash = await sha256(sessionToken);
-    const user = await db.prepare(`
-      SELECT accounts.nickname
-      FROM suzy.sessions JOIN suzy.accounts USING (nickname_key)
-      WHERE sessions.token_hash = $1 AND sessions.expires_at > $2
-    `).bind(tokenHash, now).first();
-    return json({ user });
+    const account = await getAuthenticatedAccount(request, db, secureCookies);
+    return json({ user: account ? { nickname: account.nickname, isAdmin: account.isAdmin } : null });
   }
 
   const login = url.pathname === '/api/login';
@@ -123,10 +142,11 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
   const logout = url.pathname === '/api/logout';
   if (!login && !register && !logout) return error('Страница не найдена.', 404);
   if (request.method !== 'POST') return error('Метод запроса недоступен.', 405, { Allow: 'POST' });
-  if (request.headers.get('Origin') !== url.origin) return error('Обновите страницу и повторите попытку.', 403);
-  if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
-    return error('Неверный формат запроса.', 415);
-  }
+  const invalidWrite = checkJsonWrite(request);
+  if (invalidWrite) return invalidWrite;
+
+  const cookieName = sessionCookieName(secureCookies);
+  const sessionToken = readSessionToken(request, cookieName);
 
   if (logout) {
     if (sessionToken) {
@@ -135,8 +155,10 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
     return json({ user: null }, 200, { 'Set-Cookie': sessionCookie(cookieName, '', 0, secureCookies) });
   }
 
-  const data = await readCredentials(request);
-  if (!data) return error('Проверьте никнейм и пароль.', 400);
+  const data = await readJsonBody(request);
+  if (typeof data?.nickname !== 'string' || typeof data.password !== 'string') {
+    return error('Проверьте никнейм и пароль.', 400);
+  }
   const parsed = register ? validateNickname(data.nickname) : normalizeNickname(data.nickname);
   const passwordLength = [...data.password].length;
   if (register && parsed.error) return error(parsed.error, 400);
@@ -149,6 +171,7 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
 
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   const ipHash = await sha256(ip);
+  const now = Math.floor(Date.now() / 1000);
   const limited = error('Слишком много попыток. Попробуйте через 15 минут.', 429, {
     'Retry-After': String(attemptWindowSeconds),
   });
@@ -167,6 +190,7 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
 
   const statements = [];
   let nickname = parsed.nickname;
+  let isAdmin = false;
   if (register) {
     const salt = randomHex(16);
     const hash = await derivePassword(data.password, salt, passwordIterations);
@@ -176,12 +200,16 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
     `).bind(parsed.key, nickname, salt, hash, passwordIterations, now));
   } else {
     const account = await db.prepare(`
-      SELECT nickname, password_salt, password_hash, password_iterations FROM suzy.accounts WHERE nickname_key = $1
+      SELECT nickname, password_salt, password_hash, password_iterations,
+             site_admins.nickname_key IS NOT NULL AS "isAdmin"
+      FROM suzy.accounts LEFT JOIN suzy.site_admins USING (nickname_key)
+      WHERE accounts.nickname_key = $1
     `).bind(parsed.key).first();
     const hash = await derivePassword(data.password, account?.password_salt ?? '0'.repeat(32),
       account?.password_iterations ?? passwordIterations);
     if (!hashesMatch(hash, account?.password_hash ?? '0'.repeat(64)) || !account) return error(invalidLogin, 401);
     nickname = account.nickname;
+    isAdmin = account.isAdmin;
     statements.push(db.prepare('DELETE FROM suzy.auth_attempts WHERE scope = $1').bind(accountScope));
   }
 
@@ -201,7 +229,7 @@ export async function handleApi(request, db, { secureCookies = true, passwordIte
     }
     throw cause;
   }
-  return json({ user: { nickname } }, register ? 201 : 200, {
+  return json({ user: { nickname, isAdmin } }, register ? 201 : 200, {
     'Set-Cookie': sessionCookie(cookieName, token, sessionSeconds, secureCookies),
   });
 }
