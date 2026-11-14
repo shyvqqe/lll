@@ -2,6 +2,7 @@ export const strings = {
   ru: {
     'meta.description': 'Шаг за шагом с suzy. Выбери никнейм на русском или английском и создай аккаунт.',
     'header.home': 'suzy, главная',
+    'header.overview': 'Главная',
     'header.nav': 'Основная навигация',
     'header.posts': 'Публикации',
     'header.daily': 'Гороскоп',
@@ -73,6 +74,7 @@ export const strings = {
   en: {
     'meta.description': 'Step by step with suzy. Pick a nickname in Russian or English and create an account.',
     'header.home': 'suzy home',
+    'header.overview': 'Overview',
     'header.nav': 'Main navigation',
     'header.posts': 'Posts',
     'header.daily': 'Horoscope',
@@ -144,6 +146,7 @@ export const strings = {
   cs: {
     'meta.description': 'Krok za krokem se suzy. Vyber si ruskou nebo anglickou přezdívku a vytvoř si účet.',
     'header.home': 'suzy, úvodní stránka',
+    'header.overview': 'Přehled',
     'header.nav': 'Hlavní navigace',
     'header.posts': 'Příspěvky',
     'header.daily': 'Horoskop',
