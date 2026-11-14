@@ -1,5 +1,10 @@
+import { readFileSync } from 'node:fs';
 import { checkServerIdentity } from 'node:tls';
 import pg from 'pg';
+
+// Supabase Studio's published production root certificate. Scope trust to its shared pooler.
+const supabasePoolerHost = /^[a-z0-9-]+\.pooler\.supabase\.(?:com|co)$/i;
+const supabaseRootCertificate = new URL('../certs/prod-ca-2021.crt', import.meta.url);
 
 export function databaseOptions(connectionString, rootCertificate) {
   if (!connectionString) throw new Error('DATABASE_URL is required.');
@@ -26,7 +31,9 @@ export function databaseOptions(connectionString, rootCertificate) {
     throw new Error('DATABASE_URL must be a PostgreSQL URL with credentials and database name. Use no query parameters or sslmode=verify-full.');
   }
 
-  const ca = rootCertificate?.trim();
+  const ca = rootCertificate?.trim() || (supabasePoolerHost.test(settings.host)
+    ? readFileSync(supabaseRootCertificate, 'utf8')
+    : undefined);
   return {
     ...settings,
     ssl: {
