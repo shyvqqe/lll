@@ -1,4 +1,4 @@
-import { translate, translateApiError } from './i18n.js?v=5';
+import { translate, translateApiError } from './i18n.js?v=6';
 
 const postsSection = document.querySelector('#public-posts');
 const status = document.querySelector('#site-posts-status');

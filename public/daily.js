@@ -1,4 +1,5 @@
-import { getLanguage, translate, localeFor } from './i18n.js?v=5';
+import { isMotionReduced } from './accessibility.js?v=6';
+import { getLanguage, translate, localeFor } from './i18n.js?v=6';
 import { signNames, translatedReadings } from './daily-translations.js';
 
 const signs = [
@@ -63,7 +64,6 @@ const forecast = document.querySelector('#daily-forecast');
 const task = document.querySelector('#daily-task');
 const doneButton = document.querySelector('#daily-done');
 const doneText = doneButton.querySelector('span');
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function stored(key) {
   try { return localStorage.getItem(key); } catch { return null; }
@@ -112,7 +112,7 @@ function showDaily(animate = false) {
   updateCompletion();
   doneButton.hidden = false;
 
-  if (animate && !reduceMotion.matches) {
+  if (animate && !isMotionReduced()) {
     copyAnimation?.cancel();
     markAnimation?.cancel();
     copyAnimation = document.querySelector('#daily-copy').animate(
@@ -161,17 +161,22 @@ doneButton.addEventListener('click', () => {
 
 updateLanguage();
 document.addEventListener('suzy:language', updateLanguage);
+document.addEventListener('suzy:accessibility', () => {
+  if (!isMotionReduced()) return;
+  copyAnimation?.cancel();
+  markAnimation?.cancel();
+});
 function refreshDate() {
   if (shownDate !== localDate(new Date())) showDaily();
 }
 setInterval(refreshDate, 30_000);
 document.addEventListener('visibilitychange', refreshDate);
 
-if (!reduceMotion.matches && 'IntersectionObserver' in window) {
+if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
-      entry.target.classList.add('revealed');
+      if (!isMotionReduced()) entry.target.classList.add('revealed');
       observer.unobserve(entry.target);
     }
   }, { rootMargin: '0px 0px -32px' });

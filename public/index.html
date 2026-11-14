@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#343739">
+  <meta name="theme-color" content="#181818">
   <meta name="description" data-i18n-content="meta.description" content="Шаг за шагом с suzy. Выбери никнейм на русском или английском и создай аккаунт.">
   <title>suzy</title>
   <link rel="icon" href="/assets/duck.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap">
-  <link rel="stylesheet" href="/style.css?v=5">
-  <script type="module" src="/i18n.js?v=5"></script>
-  <script type="module" src="/content.js?v=5"></script>
-  <script type="module" src="/app.js?v=5"></script>
-  <script type="module" src="/daily.js?v=5"></script>
+  <link rel="stylesheet" href="/style.css?v=6">
+  <script type="module" src="/accessibility.js?v=6"></script>
+  <script type="module" src="/i18n.js?v=6"></script>
+  <script type="module" src="/content.js?v=6"></script>
+  <script type="module" src="/app.js?v=6"></script>
+  <script type="module" src="/daily.js?v=6"></script>
 </head>
 <body>
   <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -33,6 +34,7 @@
     <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7m-7 4h5"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4-1L21 6l-4-4L4 15z"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+    <symbol id="i-accessibility" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.75"/><path d="m4 9 8 1.5L20 9m-8 1.5v4m0 0L8 21m4-6.5 4 6.5"/></symbol>
   </svg>
 
   <header class="site-header" id="top">
@@ -42,13 +44,18 @@
         <span>suzy</span>
       </a>
       <nav class="header-nav" aria-label="Навигация" data-i18n-label="header.nav"><a href="#public-posts" data-i18n="header.posts">Публикации</a><a href="#daily" data-i18n="header.daily">Гороскоп</a><a href="#rules" data-i18n="header.rules">Правила</a></nav>
-      <div class="language-picker">
-        <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
-        <select id="language" aria-label="Язык сайта" data-i18n-label="language.label">
-          <option value="ru" lang="ru">Русский</option>
-          <option value="en" lang="en">English</option>
-          <option value="cs" lang="cs">Čeština</option>
-        </select>
+      <div class="header-preferences">
+        <div class="language-picker">
+          <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
+          <select id="language" aria-label="Язык сайта" data-i18n-label="language.label">
+            <option value="ru" lang="ru">Русский</option>
+            <option value="en" lang="en">English</option>
+            <option value="cs" lang="cs">Čeština</option>
+          </select>
+        </div>
+        <button class="button button-outline accessibility-open" id="accessibility-open" type="button" aria-haspopup="dialog" aria-controls="accessibility-dialog">
+          <svg class="icon" aria-hidden="true"><use href="#i-accessibility"/></svg><span data-i18n="accessibility.open">Доступность</span>
+        </button>
       </div>
       <div class="header-actions" data-guest>
         <button class="button button-outline" type="button" data-open="login" data-i18n="auth.loginButton">Войти</button>
@@ -198,6 +205,29 @@
       <p id="post-editor-error" class="form-error" role="alert" hidden></p>
       <button class="button button-light dialog-submit" type="submit"><span data-i18n="posts.publish">Опубликовать</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
     </form>
+  </dialog>
+  <dialog class="accessibility-dialog" id="accessibility-dialog" aria-labelledby="accessibility-title" aria-describedby="accessibility-intro">
+    <div class="dialog-top">
+      <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-accessibility"/></svg></span>
+      <button type="button" class="icon-button close-button" data-accessibility-close aria-label="Закрыть настройки доступности" data-i18n-label="accessibility.close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </div>
+    <h2 id="accessibility-title" data-i18n="accessibility.title">Настройки доступности</h2>
+    <p class="dialog-intro" id="accessibility-intro" data-i18n="accessibility.intro">Настрой отображение и движение. Выбор сохранится в этом браузере.</p>
+    <div class="accessibility-options">
+      <label class="accessibility-option" for="reduce-motion">
+        <input type="checkbox" id="reduce-motion" aria-labelledby="motion-label" aria-describedby="motion-hint">
+        <span><strong id="motion-label" data-i18n="accessibility.reduceMotion">Уменьшить движение</strong><small id="motion-hint" data-i18n="accessibility.motionHint">Отключает анимацию и плавную прокрутку.</small><small id="system-motion-hint" data-system-motion data-i18n="accessibility.systemMotion" hidden>Включено в настройках устройства.</small></span>
+      </label>
+      <label class="accessibility-option" for="high-contrast">
+        <input type="checkbox" id="high-contrast" aria-labelledby="contrast-label" aria-describedby="contrast-hint">
+        <span><strong id="contrast-label" data-i18n="accessibility.highContrast">Высокий контраст</strong><small id="contrast-hint" data-i18n="accessibility.contrastHint">Усиливает контраст текста, кнопок и полей.</small><small id="system-contrast-hint" data-system-contrast data-i18n="accessibility.systemContrast" hidden>Включено в настройках устройства.</small></span>
+      </label>
+      <label class="accessibility-option" for="larger-text">
+        <input type="checkbox" id="larger-text" aria-labelledby="larger-text-label" aria-describedby="larger-text-hint">
+        <span><strong id="larger-text-label" data-i18n="accessibility.largerText">Крупный текст</strong><small id="larger-text-hint" data-i18n="accessibility.textHint">Увеличивает основной текст и подписи.</small></span>
+      </label>
+    </div>
+    <button class="button button-outline dialog-submit" type="button" id="accessibility-reset" data-i18n="accessibility.reset">Сбросить настройки</button>
   </dialog>
   <div class="toast" role="status" aria-live="polite" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span></span></div>
 </body>
