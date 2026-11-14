@@ -1,4 +1,4 @@
-import { strings } from './strings.js?v=6';
+import { strings } from './strings.js?v=7';
 import { actionStrings, apiErrorKeys } from './action-strings.js?v=5';
 
 const locales = { ru: 'ru-RU', en: 'en-GB', cs: 'cs-CZ' };

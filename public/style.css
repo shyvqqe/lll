@@ -321,6 +321,17 @@ html[data-contrast="high"] {
   .section-heading time, .field-hint { color: var(--text); }
 }
 
+html[data-calm-view] {
+  .hero-picture, .astro-mark { display: none; }
+  .hero { min-height: 0; padding-block: clamp(32px, 5vw, 64px); }
+  .hero-content { padding-block-end: 44px; }
+  .hero h1 { font-size: clamp(35px, 5vw, 64px); line-height: 1.15; letter-spacing: -.035em; }
+  .scroll-link { bottom: 20px; }
+  .post-card, .daily-reading, .daily-task { background: var(--surface-quiet); }
+  dialog::backdrop { backdrop-filter: none; }
+  :is(main, dialog) :is(p, [data-post-body], .accessibility-option small) { line-height: 1.85; letter-spacing: .015em; word-spacing: .055em; }
+}
+
 html[data-text="large"] {
   .header-inner { grid-template-columns: minmax(0, 1fr) auto auto; padding-block: 10px; }
   .header-nav { display: none; }
@@ -339,3 +350,5 @@ html[data-text="large"] {
     .header-actions { grid-column: 2; grid-row: 1; flex-wrap: wrap; }
   }
 }
+
+html[data-calm-view][data-text="large"] .hero { min-height: 0; }

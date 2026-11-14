@@ -66,6 +66,8 @@ export const strings = {
     'accessibility.systemContrast': 'Включено в настройках устройства.',
     'accessibility.largerText': 'Крупный текст',
     'accessibility.textHint': 'Увеличивает основной текст и подписи.',
+    'accessibility.calm': 'Спокойный интерфейс',
+    'accessibility.calmHint': 'Ровный фон, больше места между строками, без фото и анимаций.',
     'accessibility.reset': 'Сбросить настройки',
   },
   en: {
@@ -135,6 +137,8 @@ export const strings = {
     'accessibility.systemContrast': 'On in your device settings.',
     'accessibility.largerText': 'Larger text',
     'accessibility.textHint': 'Makes body text and labels larger.',
+    'accessibility.calm': 'Calm mode',
+    'accessibility.calmHint': 'Uses a plain background and more space between lines, and hides photos and animations.',
     'accessibility.reset': 'Reset settings',
   },
   cs: {
@@ -204,6 +208,8 @@ export const strings = {
     'accessibility.systemContrast': 'Zapnuto v nastavení zařízení.',
     'accessibility.largerText': 'Větší text',
     'accessibility.textHint': 'Zvětší běžný text a popisky.',
+    'accessibility.calm': 'Klidný režim',
+    'accessibility.calmHint': 'Jednobarevné pozadí a větší řádkování, bez fotek a animací.',
     'accessibility.reset': 'Obnovit výchozí nastavení',
   },
 };

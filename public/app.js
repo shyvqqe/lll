@@ -1,4 +1,4 @@
-import { translate, translateApiError } from './i18n.js?v=6';
+import { translate, translateApiError } from './i18n.js?v=7';
 
 const dialog = document.querySelector('#account-dialog');
 const form = document.querySelector('#account-form');

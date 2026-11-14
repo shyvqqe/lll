@@ -1,5 +1,5 @@
-import { isMotionReduced } from './accessibility.js?v=6';
-import { getLanguage, translate, localeFor } from './i18n.js?v=6';
+import { isMotionReduced } from './accessibility.js?v=7';
+import { getLanguage, translate, localeFor } from './i18n.js?v=7';
 import { signNames, translatedReadings } from './daily-translations.js';
 
 const signs = [
