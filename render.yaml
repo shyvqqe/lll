@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: suzy
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: 'true'
+      - key: DATABASE_URL
+        sync: false
