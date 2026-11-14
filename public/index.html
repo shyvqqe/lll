@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#181818">
-  <meta name="description" content="Шаг за шагом с suzy. Выбери никнейм на русском или английском и создай аккаунт.">
+  <meta name="theme-color" content="#343739">
+  <meta name="description" data-i18n-content="meta.description" content="Шаг за шагом с suzy. Выбери никнейм на русском или английском и создай аккаунт.">
   <title>suzy</title>
   <link rel="icon" href="/assets/duck.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap">
-  <link rel="stylesheet" href="/style.css?v=4">
-  <script type="module" src="/content.js"></script>
-  <script type="module" src="/app.js?v=4"></script>
-  <script type="module" src="/daily.js"></script>
+  <link rel="stylesheet" href="/style.css?v=5">
+  <script type="module" src="/i18n.js?v=5"></script>
+  <script type="module" src="/content.js?v=5"></script>
+  <script type="module" src="/app.js?v=5"></script>
+  <script type="module" src="/daily.js?v=5"></script>
 </head>
 <body>
   <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -31,21 +32,30 @@
     <symbol id="i-post" viewBox="0 0 24 24"><path d="M4 7h4l11-4v16L8 15H4zM8 15l2 6H6l-2-6"/></symbol>
     <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7m-7 4h5"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4-1L21 6l-4-4L4 15z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
   </svg>
 
   <header class="site-header" id="top">
     <div class="shell header-inner">
-      <a class="brand" href="#top" aria-label="suzy, главная">
+      <a class="brand" href="#top" aria-label="suzy, главная" data-i18n-label="header.home">
         <span class="brand-mark"><svg aria-hidden="true"><use href="#i-duck"/></svg></span>
         <span>suzy</span>
       </a>
-      <nav class="header-nav" aria-label="Навигация"><a href="#public-posts">Публикации</a><a href="#daily">Гороскоп</a><a href="#rules">Правила</a></nav>
+      <nav class="header-nav" aria-label="Навигация" data-i18n-label="header.nav"><a href="#public-posts" data-i18n="header.posts">Публикации</a><a href="#daily" data-i18n="header.daily">Гороскоп</a><a href="#rules" data-i18n="header.rules">Правила</a></nav>
+      <div class="language-picker">
+        <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
+        <select id="language" aria-label="Язык сайта" data-i18n-label="language.label">
+          <option value="ru" lang="ru">Русский</option>
+          <option value="en" lang="en">English</option>
+          <option value="cs" lang="cs">Čeština</option>
+        </select>
+      </div>
       <div class="header-actions" data-guest>
-        <button class="button button-outline" type="button" data-open="login">Войти</button>
-        <button class="button button-light" type="button" data-open="register">Регистрация <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></button>
+        <button class="button button-outline" type="button" data-open="login" data-i18n="auth.loginButton">Войти</button>
+        <button class="button button-light" type="button" data-open="register"><span data-i18n="auth.registerButton">Регистрация</span> <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></button>
       </div>
       <div class="header-actions" data-member hidden>
-        <button class="button button-light" type="button" data-open="profile"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg> Профиль</button>
+        <button class="button button-light" type="button" data-open="profile"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span data-i18n="auth.profileButton">Профиль</span></button>
       </div>
     </div>
   </header>
@@ -53,34 +63,34 @@
   <main class="shell">
     <section class="hero" aria-labelledby="hero-title">
       <figure class="hero-picture">
-        <img src="/assets/duck.webp" alt="Белая утка плывёт по тёмной воде" width="1200" height="900" fetchpriority="high">
-        <figcaption><span></span> УТКА НА НОЧНОЙ ВОДЕ</figcaption>
+        <img src="/assets/duck.webp" alt="Белая утка плывёт по тёмной воде" data-i18n-alt="hero.imageAlt" width="1200" height="900" fetchpriority="high">
+        <figcaption><span></span><b data-i18n="hero.caption">УТКА НА НОЧНОЙ ВОДЕ</b></figcaption>
       </figure>
       <div class="hero-content">
-        <h1 id="hero-title"><span class="hero-line">шаг за шагом</span> <span class="hero-line">с <em>suzy</em></span></h1>
-        <p data-guest>Выбери никнейм на русском или английском<br class="wide"> и создай аккаунт.</p>
-        <p data-member hidden>С возвращением, <strong data-nickname></strong>.</p>
+        <h1 id="hero-title"><span class="hero-line" data-i18n="hero.titleFirst">шаг за шагом</span> <span class="hero-line"><span data-i18n="hero.titleSecond">с </span><em>suzy</em></span></h1>
+        <p data-guest data-i18n="hero.guest">Выбери никнейм на русском или английском и создай аккаунт.</p>
+        <p data-member hidden><span data-i18n="hero.welcomePrefix">С возвращением, </span><strong data-nickname></strong>.</p>
         <div class="hero-actions" data-guest>
-          <button class="button button-light" type="button" data-open="register">Создать аккаунт <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-          <button class="button button-outline" type="button" data-open="login"><svg class="icon" aria-hidden="true"><use href="#i-enter"/></svg> Войти</button>
+          <button class="button button-light" type="button" data-open="register"><span data-i18n="auth.createButton">Создать аккаунт</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <button class="button button-outline" type="button" data-open="login"><svg class="icon" aria-hidden="true"><use href="#i-enter"/></svg><span data-i18n="auth.loginButton">Войти</span></button>
         </div>
         <div class="hero-actions" data-member hidden>
-          <button class="button button-light" type="button" data-open="profile">Мой профиль <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <button class="button button-light" type="button" data-open="profile"><span data-i18n="auth.myProfileButton">Мой профиль</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </div>
       </div>
-      <a class="scroll-link" href="#daily"><span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></span> Гороскоп и задание</a>
+      <a class="scroll-link" href="#daily"><span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></span><b data-i18n="hero.jump">Гороскоп и задание</b></a>
     </section>
 
     <section class="club-section" id="public-posts" aria-labelledby="posts-title">
-      <h2 id="posts-title" class="section-title" data-reveal>Публикации</h2>
+      <h2 id="posts-title" class="section-title" data-i18n="posts.heading" data-reveal>Публикации</h2>
       <div class="posts-grid">
         <article class="post-card" data-site-post="news" data-reveal>
-          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-post"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать новости" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> Редактировать</button></div>
+          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-post"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать новости" data-i18n-label="posts.editNews" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span data-i18n="posts.edit">Редактировать</span></button></div>
           <h3 data-post-title>Новости</h3>
           <div data-post-body></div>
         </article>
         <article class="post-card" data-site-post="notes" data-reveal>
-          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-note"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать заметки" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> Редактировать</button></div>
+          <div class="post-top"><span class="rule-icon"><svg class="icon" aria-hidden="true"><use href="#i-note"/></svg></span><button class="button button-outline post-edit" type="button" data-post-edit aria-label="Редактировать заметки" data-i18n-label="posts.editNotes" hidden><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span data-i18n="posts.edit">Редактировать</span></button></div>
           <h3 data-post-title>Заметки</h3>
           <div data-post-body></div>
         </article>
@@ -90,12 +100,12 @@
 
     <section class="club-section daily" id="daily" aria-labelledby="daily-title">
       <div class="section-heading" data-reveal>
-        <h2 id="daily-title" class="section-title">Гороскоп на сегодня</h2>
+        <h2 id="daily-title" class="section-title" data-i18n="daily.heading">Гороскоп на сегодня</h2>
         <time id="daily-date"></time>
       </div>
       <div class="daily-layout" data-reveal>
         <div class="sign-picker">
-          <h3 id="sign-label">Выбери свой знак</h3>
+          <h3 id="sign-label" data-i18n="daily.choose">Выбери свой знак</h3>
           <div id="signs" class="signs" role="group" aria-labelledby="sign-label"></div>
         </div>
         <article class="daily-reading" aria-labelledby="daily-sign">
@@ -104,7 +114,7 @@
             <h3 id="daily-sign"></h3>
             <p id="daily-forecast"></p>
             <div class="daily-task">
-              <h4><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> Задание дня</h4>
+              <h4><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span data-i18n="daily.task">Задание дня</span></h4>
               <p id="daily-task"></p>
             </div>
           </div>
@@ -114,79 +124,79 @@
     </section>
 
     <section class="rules" id="rules" aria-labelledby="rules-title" data-reveal>
-      <h2 id="rules-title">Правила никнеймов</h2>
+      <h2 id="rules-title" data-i18n="rules.heading">Правила никнеймов</h2>
       <div class="rules-grid">
         <article>
           <div class="rule-icon" aria-hidden="true">Аа</div>
-          <h3>На двух языках</h3>
-          <p>От 4 до 25 символов. Возьми буквы одного алфавита, русского или английского. Можно добавить цифры и нижнее подчёркивание.</p>
+          <h3 data-i18n="rules.languages">На двух языках</h3>
+          <p data-i18n="rules.languagesText">От 4 до 25 символов. Возьми буквы одного алфавита, русского или английского. Можно добавить цифры и нижнее подчёркивание.</p>
           <div class="examples"><code>ТихаяУтка</code><code>NightDuck_7</code></div>
         </article>
         <article>
           <div class="rule-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22c4-2 7-5 7-10V6l-7-4-7 4v6c0 5 3 8 7 10Z"/><path d="m9 12 2 2 4-4"/></svg></div>
-          <h3>Уважай других</h3>
-          <p>Запрещены оскорбления, травля, язык ненависти, угрозы и призывы к насилию.</p>
+          <h3 data-i18n="rules.respect">Уважай других</h3>
+          <p data-i18n="rules.respectText">Запрещены оскорбления, травля, язык ненависти, угрозы и призывы к насилию.</p>
         </article>
         <article>
           <div class="rule-icon" aria-hidden="true"><svg class="icon"><use href="#i-user"/></svg></div>
-          <h3>Оставайся собой</h3>
-          <p>Запрещены чужие личные данные и попытки выдать себя за другого человека или команду клуба.</p>
+          <h3 data-i18n="rules.self">Оставайся собой</h3>
+          <p data-i18n="rules.selfText">Запрещены чужие личные данные и попытки выдать себя за другого человека или команду клуба.</p>
         </article>
       </div>
-      <p class="rules-note">Под запретом также сексуально откровенные отсылки и упоминания тяжёлых наркотиков.</p>
+      <p class="rules-note" data-i18n="rules.note">Под запретом также сексуально откровенные отсылки и упоминания тяжёлых наркотиков.</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="shell footer-inner">
       <a class="brand footer-brand" href="#top"><svg aria-hidden="true"><use href="#i-duck"/></svg> suzy</a>
-      <a class="source" href="#top">Наверх <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></a>
+      <a class="source" href="#top"><span data-i18n="footer.up">Наверх</span> <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></a>
     </div>
   </footer>
 
   <dialog id="account-dialog" aria-labelledby="dialog-title">
     <div class="dialog-top">
       <span class="brand-mark"><svg aria-hidden="true"><use href="#i-duck"/></svg></span>
-      <button type="button" class="icon-button close-button" data-close aria-label="Закрыть"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      <button type="button" class="icon-button close-button" data-close aria-label="Закрыть" data-i18n-label="auth.close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
     <h2 id="dialog-title"></h2>
     <p id="dialog-text" class="dialog-intro"></p>
     <form id="account-form" novalidate>
       <div class="field">
-        <label for="nickname">Никнейм</label>
+        <label for="nickname" data-i18n="auth.nicknameLabel">Никнейм</label>
         <input id="nickname" name="nickname" required maxlength="25" autocomplete="username" spellcheck="false" autocapitalize="off" aria-describedby="nickname-hint">
-        <p id="nickname-hint" class="field-hint">4–25 символов. Русские или английские буквы, цифры и _.</p>
+        <p id="nickname-hint" class="field-hint" data-i18n="auth.nicknameHint">4–25 символов. Русские или английские буквы, цифры и _.</p>
       </div>
       <div class="field">
-        <label for="password">Пароль</label>
+        <label for="password" data-i18n="auth.passwordLabel">Пароль</label>
         <div class="password-box">
           <input id="password" name="password" type="password" required maxlength="128" aria-describedby="password-hint">
           <button class="icon-button password-toggle" type="button" aria-label="Показать пароль" aria-pressed="false" data-password><svg class="icon" aria-hidden="true"><use href="#i-eye"/><use href="#i-slash" class="eye-slash"/></svg></button>
         </div>
-        <p id="password-hint" class="field-hint">От 8 до 128 символов.</p>
+        <p id="password-hint" class="field-hint" data-i18n="auth.passwordHint">От 8 до 128 символов.</p>
       </div>
       <p class="form-error" role="alert" hidden></p>
       <button id="submit-account" class="button button-light dialog-submit" type="submit"><span></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       <p class="dialog-switch"><span id="switch-prompt"></span> <button class="text-button" type="button" data-switch></button></p>
     </form>
     <div id="profile-panel" hidden>
-      <div class="profile-nickname"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><div><span>Твой никнейм</span><strong data-nickname></strong></div></div>
+      <div class="profile-nickname"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><div><span data-i18n="auth.profileNickname">Твой никнейм</span><strong data-nickname></strong></div></div>
       <p class="form-error" role="alert" hidden></p>
-      <button class="button button-outline dialog-submit" type="button" data-logout>Выйти из аккаунта</button>
+      <button class="button button-outline dialog-submit" type="button" data-logout data-i18n="auth.logoutButton">Выйти из аккаунта</button>
     </div>
   </dialog>
   <dialog id="post-editor" aria-labelledby="post-editor-title">
     <div class="dialog-top">
       <span class="brand-mark"><svg aria-hidden="true"><use href="#i-edit"/></svg></span>
-      <button type="button" class="icon-button close-button" data-post-close aria-label="Закрыть редактор"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      <button type="button" class="icon-button close-button" data-post-close aria-label="Закрыть редактор" data-i18n-label="posts.close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
-    <h2 id="post-editor-title">Редактировать публикацию</h2>
-    <p class="dialog-intro">После сохранения текст увидят все посетители.</p>
+    <h2 id="post-editor-title" data-i18n="posts.editorTitle">Редактировать публикацию</h2>
+    <p class="dialog-intro" data-i18n="posts.editorIntro">После сохранения текст увидят все посетители.</p>
     <form id="post-editor-form">
-      <div class="field"><label for="post-title">Заголовок</label><input id="post-title" name="title" required></div>
-      <div class="field"><label for="post-body">Текст</label><textarea id="post-body" name="body" rows="6" required></textarea></div>
+      <div class="field"><label for="post-title" data-i18n="posts.titleLabel">Заголовок</label><input id="post-title" name="title" required></div>
+      <div class="field"><label for="post-body" data-i18n="posts.bodyLabel">Текст</label><textarea id="post-body" name="body" rows="6" required></textarea></div>
       <p id="post-editor-error" class="form-error" role="alert" hidden></p>
-      <button class="button button-light dialog-submit" type="submit">Опубликовать <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button class="button button-light dialog-submit" type="submit"><span data-i18n="posts.publish">Опубликовать</span> <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
     </form>
   </dialog>
   <div class="toast" role="status" aria-live="polite" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span></span></div>

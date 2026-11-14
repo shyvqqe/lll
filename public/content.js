@@ -1,12 +1,16 @@
+import { translate, translateApiError } from './i18n.js?v=5';
+
 const postsSection = document.querySelector('#public-posts');
 const status = document.querySelector('#site-posts-status');
 const editor = document.querySelector('#post-editor');
 const form = document.querySelector('#post-editor-form');
+form.noValidate = true;
 const titleField = document.querySelector('#post-title');
 const bodyField = document.querySelector('#post-body');
 const editorError = document.querySelector('#post-editor-error');
 const submitButton = form.querySelector('button[type="submit"]');
 const closeButtons = editor.querySelectorAll('[data-post-close]');
+const defaultTitles = { news: 'Новости', notes: 'Заметки' };
 
 const posts = new Map();
 for (const article of postsSection.querySelectorAll('[data-site-post]')) {
@@ -21,6 +25,8 @@ for (const article of postsSection.querySelectorAll('[data-site-post]')) {
 let isAdmin = false;
 let editingPost = null;
 let saving = false;
+let statusMessage;
+let errorMessage;
 
 function updateActions() {
   for (const { button, block } of posts.values()) {
@@ -32,16 +38,33 @@ function renderBlock(block) {
   const post = posts.get(block?.id);
   if (!post || typeof block.title !== 'string' || typeof block.body !== 'string') return false;
   post.block = block;
-  post.title.textContent = block.title;
-  post.body.textContent = block.body || 'Пока публикаций нет.';
+  renderPostCopy(block.id, post);
   return true;
 }
 
-function setError(message = '', field) {
+function renderPostCopy(id, post) {
+  const block = post.block;
+  const defaultTitle = translate(`posts.${id}`);
+  post.title.textContent = !block || (block.body === '' && block.title === defaultTitles[id])
+    ? defaultTitle : block.title;
+  if (block) post.body.textContent = block.body || translate('action.posts.empty');
+}
+
+function messageText(message) {
+  if (typeof message === 'string') return translate(message);
+  return message ? translateApiError(message.message) : '';
+}
+
+function renderError() {
+  editorError.textContent = messageText(errorMessage);
+  editorError.hidden = !errorMessage;
+}
+
+function setError(message, field) {
   titleField.removeAttribute('aria-invalid');
   bodyField.removeAttribute('aria-invalid');
-  editorError.textContent = message;
-  editorError.hidden = !message;
+  errorMessage = message;
+  renderError();
   if (field) {
     field.setAttribute('aria-invalid', 'true');
     field.focus();
@@ -56,8 +79,9 @@ function setSaving(nextSaving) {
   for (const button of closeButtons) button.disabled = saving;
 }
 
-function announce(message = '') {
-  status.textContent = message;
+function announce(message) {
+  statusMessage = message;
+  status.textContent = messageText(statusMessage);
 }
 
 async function fetchContent(path = '', options) {
@@ -65,11 +89,11 @@ async function fetchContent(path = '', options) {
   try {
     response = await fetch(`/api/content${path}`, options);
   } catch {
-    throw new Error('Проверь подключение к интернету и попробуй ещё раз.');
+    throw new Error('', { cause: 'action.error.network' });
   }
   const data = await response.json().catch(() => null);
   if (!response.ok || !data) {
-    throw new Error(typeof data?.error === 'string' ? data.error : 'Попробуй ещё раз чуть позже.');
+    throw new Error(typeof data?.error === 'string' ? data.error : '');
   }
   return data;
 }
@@ -112,11 +136,11 @@ form.addEventListener('submit', async (event) => {
   const body = bodyField.value.trim();
   const titleLength = [...title].length;
   if (titleLength < 2 || titleLength > 70) {
-    setError('В заголовке должно быть от 2 до 70 символов.', titleField);
+    setError('action.api.postTitleLength', titleField);
     return;
   }
   if (!body || [...body].length > 2500) {
-    setError('В тексте должно быть от 1 до 2500 символов.', bodyField);
+    setError('action.api.postBodyLength', bodyField);
     return;
   }
 
@@ -129,13 +153,13 @@ form.addEventListener('submit', async (event) => {
       body: JSON.stringify({ title, body }),
     });
     if (block?.id !== blockId || !renderBlock(block)) {
-      throw new Error('Не удалось обновить публикацию. Обнови страницу и проверь изменения.');
+      throw new Error('', { cause: 'action.posts.unknownUpdate' });
     }
     if (editor.open) editor.close();
-    announce('Публикация сохранена.');
+    announce('action.posts.saved');
   } catch (error) {
-    if (editor.open) setError(error.message);
-    else announce(error.message);
+    if (editor.open) setError(error.cause ?? error);
+    else announce(error.cause ?? error);
   } finally {
     setSaving(false);
   }
@@ -147,7 +171,15 @@ document.addEventListener('suzy:session', (event) => {
   if (!isAdmin && editor.open) editor.close();
 });
 
-announce('Обновляем публикации…');
+function renderLocalizedCopy() {
+  for (const [id, post] of posts) renderPostCopy(id, post);
+  status.textContent = messageText(statusMessage);
+  renderError();
+}
+
+document.addEventListener('suzy:language', renderLocalizedCopy);
+renderLocalizedCopy();
+announce('action.posts.loading');
 fetchContent().then(({ blocks }) => {
   if (!Array.isArray(blocks)) throw new Error();
   for (const block of blocks) renderBlock(block);
@@ -155,5 +187,5 @@ fetchContent().then(({ blocks }) => {
   if ([...posts.values()].some(({ block }) => !block)) throw new Error();
   announce();
 }).catch(() => {
-  announce('Не удалось загрузить публикации. Обнови страницу, чтобы попробовать ещё раз.');
+  announce('action.posts.loadFailed');
 });

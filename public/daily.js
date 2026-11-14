@@ -1,3 +1,6 @@
+import { getLanguage, translate, localeFor } from './i18n.js?v=5';
+import { signNames, translatedReadings } from './daily-translations.js';
+
 const signs = [
   ['Овен', '♈', 'fire'], ['Телец', '♉', 'earth'], ['Близнецы', '♊', 'air'],
   ['Рак', '♋', 'water'], ['Лев', '♌', 'fire'], ['Дева', '♍', 'earth'],
@@ -60,7 +63,6 @@ const forecast = document.querySelector('#daily-forecast');
 const task = document.querySelector('#daily-task');
 const doneButton = document.querySelector('#daily-done');
 const doneText = doneButton.querySelector('span');
-const shortDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' });
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function stored(key) {
@@ -85,25 +87,26 @@ let markAnimation;
 function updateCompletion() {
   const done = completed.has(selected);
   doneButton.setAttribute('aria-pressed', String(done));
-  doneText.textContent = done ? 'Выполнено' : 'Отметить выполненным';
+  doneText.textContent = translate(done ? 'daily.done' : 'daily.markDone');
 }
 
 function showDaily(animate = false) {
   const now = new Date();
   const date = localDate(now);
+  const language = getLanguage();
   if (shownDate !== date) {
     shownDate = date;
     dateLabel.dateTime = date;
-    dateLabel.textContent = shortDate.format(now);
     const [savedDate, values] = (stored('suzy.daily.completed') ?? '').split(':');
     completed = new Set(savedDate === date ? values.split(',').filter(Boolean).map(Number) : []);
   }
+  dateLabel.textContent = new Intl.DateTimeFormat(localeFor(language), { day: 'numeric', month: 'long' }).format(now);
   const [name, symbol, element] = signs[selected];
   const day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86_400_000);
-  const choices = readings[element];
+  const choices = (translatedReadings[language] ?? readings)[element];
   const index = ((day + Math.floor(selected / 4) * 3) % choices.length + choices.length) % choices.length;
   mark.textContent = `${symbol}\uFE0E`;
-  signLabel.textContent = name;
+  signLabel.textContent = signNames[language]?.[selected] ?? name;
   [forecast.textContent, task.textContent] = choices[index];
   Array.from(buttons.children).forEach((button, position) => button.setAttribute('aria-pressed', String(position === selected)));
   updateCompletion();
@@ -123,14 +126,15 @@ function showDaily(animate = false) {
   }
 }
 
-signs.forEach(([name, symbol], index) => {
+const buttonNames = signs.map(([, symbol], index) => {
   const button = document.createElement('button');
   const icon = document.createElement('span');
+  const label = document.createTextNode('');
   button.type = 'button';
   button.className = 'sign-button';
   icon.textContent = `${symbol}\uFE0E`;
   icon.setAttribute('aria-hidden', 'true');
-  button.append(icon, name);
+  button.append(icon, label);
   button.addEventListener('click', () => {
     if (index === selected) return;
     selected = index;
@@ -138,7 +142,14 @@ signs.forEach(([name, symbol], index) => {
     showDaily(true);
   });
   buttons.append(button);
+  return label;
 });
+
+function updateLanguage() {
+  const names = signNames[getLanguage()];
+  buttonNames.forEach((label, index) => { label.data = names?.[index] ?? signs[index][0]; });
+  showDaily();
+}
 
 doneButton.addEventListener('click', () => {
   if (shownDate !== localDate(new Date())) return showDaily();
@@ -148,7 +159,8 @@ doneButton.addEventListener('click', () => {
   updateCompletion();
 });
 
-showDaily();
+updateLanguage();
+document.addEventListener('suzy:language', updateLanguage);
 function refreshDate() {
   if (shownDate !== localDate(new Date())) showDaily();
 }

@@ -1,3 +1,5 @@
+import { translate, translateApiError } from './i18n.js?v=5';
+
 const dialog = document.querySelector('#account-dialog');
 const form = document.querySelector('#account-form');
 const profile = document.querySelector('#profile-panel');
@@ -9,27 +11,13 @@ const passwordToggle = form.querySelector('[data-password]');
 const logout = profile.querySelector('[data-logout]');
 const toast = document.querySelector('.toast');
 
-const authCopy = {
-  register: {
-    title: 'Создать аккаунт',
-    intro: 'Придумай никнейм и пароль для входа в клуб.',
-    switchPrompt: 'Уже есть аккаунт?',
-    switchLabel: 'Войти',
-    success: 'Аккаунт создан. Добро пожаловать!',
-  },
-  login: {
-    title: 'Войти в клуб',
-    intro: 'Введи свой никнейм и пароль.',
-    switchPrompt: 'Впервые здесь?',
-    switchLabel: 'Создать аккаунт',
-    success: 'Ты вошёл в аккаунт.',
-  },
-};
+const errors = new Map();
 
 let mode = 'login';
 let user = null;
 let pending = false;
 let toastTimer;
+let toastKey;
 
 function updateUser(nextUser) {
   user = nextUser;
@@ -42,31 +30,50 @@ function updateUser(nextUser) {
 function setPasswordVisible(visible) {
   password.type = visible ? 'text' : 'password';
   passwordToggle.setAttribute('aria-pressed', String(visible));
-  passwordToggle.setAttribute('aria-label', visible ? 'Скрыть пароль' : 'Показать пароль');
+  renderPasswordToggle();
 }
 
-function setError(container, message = '') {
+function renderPasswordToggle() {
+  const key = password.type === 'text' ? 'auth.hidePassword' : 'auth.showPassword';
+  passwordToggle.setAttribute('aria-label', translate(key));
+}
+
+function renderError(container) {
   const target = container.querySelector('.form-error');
+  const failure = errors.get(container);
+  const message = typeof failure === 'string' ? translate(failure)
+    : failure ? translateApiError(failure.message) : '';
   target.hidden = !message;
   target.textContent = message;
+}
+
+function setError(container, failure) {
+  errors.set(container, failure);
+  renderError(container);
+}
+
+function renderDialogCopy() {
+  const isProfile = mode === 'profile';
+  const isRegister = mode === 'register';
+  document.querySelector('#dialog-title').textContent = translate(`action.${mode}.title`);
+  document.querySelector('#dialog-text').textContent = translate(`action.${mode}.intro`);
+  submit.querySelector('span').textContent = translate(isRegister ? 'action.register.title' : 'action.login.button');
+  document.querySelector('#switch-prompt').textContent = isProfile ? '' : translate(`action.${mode}.prompt`);
+  switchButton.textContent = isProfile ? '' : translate(isRegister ? 'action.login.button' : 'action.register.title');
+  nickname.placeholder = isRegister ? translate('action.register.placeholder') : '';
+  renderPasswordToggle();
 }
 
 function openDialog(nextMode) {
   mode = nextMode;
   const isProfile = mode === 'profile';
   const isRegister = mode === 'register';
-  const copy = authCopy[mode];
-  document.querySelector('#dialog-title').textContent = copy?.title ?? 'Мой профиль';
-  document.querySelector('#dialog-text').textContent = copy?.intro ?? 'Ты вошёл в аккаунт suzy.';
+  renderDialogCopy();
   form.hidden = isProfile;
   profile.hidden = !isProfile;
-  submit.querySelector('span').textContent = isRegister ? 'Создать аккаунт' : 'Войти';
-  document.querySelector('#switch-prompt').textContent = copy?.switchPrompt ?? '';
-  switchButton.textContent = copy?.switchLabel ?? '';
   document.querySelector('#nickname-hint').hidden = !isRegister;
   document.querySelector('#password-hint').hidden = !isRegister;
   password.autocomplete = isRegister ? 'new-password' : 'current-password';
-  nickname.placeholder = isRegister ? 'Например, ТихаяУтка' : '';
   nickname.removeAttribute('aria-invalid');
   password.removeAttribute('aria-invalid');
   password.value = '';
@@ -89,19 +96,20 @@ async function api(path, payload) {
       body: JSON.stringify(payload),
     });
   } catch {
-    throw new Error('Не удалось подключиться. Проверь интернет и попробуй ещё раз.');
+    throw new Error('', { cause: 'action.error.network' });
   }
   const result = await response.json().catch(() => null);
   if (!response.ok || !result) {
-    throw new Error(result?.error ?? 'Что-то пошло не так. Попробуй ещё раз.');
+    throw new Error(typeof result?.error === 'string' ? result.error : '');
   }
   return result;
 }
 
-function notify(message) {
+function notify(key) {
   clearTimeout(toastTimer);
+  toastKey = key;
   toast.hidden = false;
-  toast.querySelector('span').textContent = message;
+  toast.querySelector('span').textContent = translate(key);
   toastTimer = setTimeout(() => { toast.hidden = true; }, 5000);
 }
 
@@ -153,13 +161,13 @@ form.addEventListener('submit', async (event) => {
   const name = nickname.value.trim().normalize('NFC');
   const secret = password.value;
   setError(form);
-  if (!name) return markInvalid(nickname, 'Введи никнейм.');
+  if (!name) return markInvalid(nickname, 'action.auth.nicknameRequired');
   if (mode === 'register' && (name.length < 4 || name.length > 25)) {
-    return markInvalid(nickname, 'Никнейм должен содержать от 4 до 25 символов.');
+    return markInvalid(nickname, 'action.auth.nicknameLength');
   }
-  if (!secret) return markInvalid(password, 'Введи пароль.');
+  if (!secret) return markInvalid(password, 'action.auth.passwordRequired');
   if (mode === 'register' && [...secret].length < 8) {
-    return markInvalid(password, 'В пароле должно быть не меньше 8 символов.');
+    return markInvalid(password, 'action.auth.passwordMin');
   }
 
   setPending(true);
@@ -167,9 +175,9 @@ form.addEventListener('submit', async (event) => {
     const result = await api(mode, { nickname: name, password: secret });
     updateUser(result.user);
     finishDialog();
-    notify(authCopy[mode].success);
+    notify(`action.${mode}.success`);
   } catch (error) {
-    setError(form, error.message);
+    setError(form, error.cause ?? error);
   } finally {
     setPending(false);
   }
@@ -183,12 +191,19 @@ logout.addEventListener('click', async () => {
     await api('logout', {});
     updateUser(null);
     finishDialog();
-    notify('Ты вышел из аккаунта.');
+    notify('action.logout.success');
   } catch (error) {
-    setError(profile, error.message);
+    setError(profile, error.cause ?? error);
   } finally {
     setPending(false);
   }
+});
+
+document.addEventListener('suzy:language', () => {
+  renderDialogCopy();
+  renderError(form);
+  renderError(profile);
+  if (!toast.hidden && toastKey) toast.querySelector('span').textContent = translate(toastKey);
 });
 
 const initialSession = new AbortController();
